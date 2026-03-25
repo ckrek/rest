@@ -2,63 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-
+    // Показать форму регистрации
     public function showRegister()
     {
         return view('auth.register');
     }
 
+    // Обработка регистрации
     public function register(Request $request)
     {
-
-        $request->validate([
-            'name'=>'required',
-            'email'=>'required|email|unique:users',
-            'password'=>'required|min:6'
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|confirmed|min:6',
         ]);
 
-        User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>Hash::make($request->password)
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => 'user', // по умолчанию обычный пользователь
         ]);
 
-        return redirect()->route('login');
+        Auth::login($user); // логиним нового пользователя
+
+        return redirect('/'); // на главную
     }
 
-
+    // Показать форму логина
     public function showLogin()
     {
         return view('auth.login');
     }
 
-
+    // Обработка логина
     public function login(Request $request)
     {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-        if(Auth::attempt($request->only('email','password')))
-    {
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
 
-        if(auth()->user()->role === 'admin'){
-            return redirect()->route('admin.dashboard');
+            // Редирект для админа
+            if (auth()->user()->role === 'admin') {
+                return redirect('/admin/dashboard');
+            }
+
+            return redirect()->intended('/'); // обычный пользователь
         }
-        return redirect('/');
-    }
-        return back()->with('error','Неверный логин или пароль');
+
+        return back()->withErrors([
+            'email' => 'Неверный email или пароль.',
+        ]);
     }
 
-
-    public function logout()
+    // Выход
+    public function logout(Request $request)
     {
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect('/');
     }
-
 }

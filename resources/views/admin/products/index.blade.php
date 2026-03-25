@@ -5,7 +5,7 @@
 
 <h2>Продукты</h2>
 
-<a class="btn" href="{{ route('products.create') }}">Добавить</a>
+<a class="btn" href="{{ route('admin.products.create') }}">Добавить</a>
 
 <table>
 
@@ -24,9 +24,9 @@
 
 <td>
 
-<a href="{{ route('products.edit',$product->id) }}">Редактировать</a>
+<a href="{{ route('admin.products.edit',$product->id) }}">Редактировать</a>
 
-<form method="POST" action="{{ route('products.destroy',$product->id) }}">
+<form method="POST" action="{{ route('admin.products.destroy',$product->id) }}">
 @csrf
 @method('DELETE')
 

@@ -1,9 +1,12 @@
-@extends('layouts.admin')
-
+@extends('layouts.app')
 @section('content')
+
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
+
 <h1>Создать новый продукт</h1>
 
-<form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <input type="text" name="name" placeholder="Название" required>
     <input type="text" name="description" placeholder="Описание" required>
